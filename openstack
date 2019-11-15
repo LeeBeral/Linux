@@ -1,0 +1,3 @@
+为虚拟机绑定VIP
+neutron port-create --fixed-ip ip_address=5.50.201.30 --security-group paas_sg paas20big_om
+neutron port-update afc62d0c-e430-432f-b56d-2d04ab45997c --allowed_address_pairs list=true type=dict ip_address=5.50.201.30
