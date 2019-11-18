@@ -33,3 +33,62 @@ ls /var/run/sshd.init.pid
 没有这个文件，touch一个
 
 
+服务器不断重启，修复ext文件系统坏块
+
+第一，确认故障盘以及文件系统是否为EXT
+
+1.cd /var/log/kbox/kbox-2019-07-10-06-02
+2.gzip -d kboxdump.gz
+3.cat kboxdump | grep panic
+
+[  519.104297] Kernel panic - not syncing: EXT3-fs (sda7): panic forced after error
+[  519.153652]  [<ffffffff8146d81f>] panic+0xb6/0x236
+<0>[  519.104297] Kernel panic - not syncing: EXT3-fs (sda7): panic forced after error
+<4>[  519.153652]  [<ffffffff8146d81f>] panic+0xb6/0x236
+ [<ffffffff81065272>] panic_smp_self_stop+0x2/0x20
+ [<ffffffff8146d7b2>] panic+0x49/0x236
+ [<ffffffff81065272>] panic_smp_self_stop+0x2/0x20
+ [<ffffffff8146d7b2>] panic+0x49/0x236
+ [<ffffffff81065272>] panic_smp_self_stop+0x2/0x20
+ [<ffffffff8146d7b2>] panic+0x49/0x236
+
+
+第二，卸载故障盘  
+
+1.umount /dev/sda7
+2.unnme -ar
+3.umount /var/log
+4.lsof /var/log
+5.vi /etc/fstab #查看参数是否包含errors=panic，这条参数表示有坏块就重启修复，将故障盘注释掉
+6.reboot 
+
+第三，停止系统日志
+ service syslog stop
+
+第四，查看状态是否为clean，不是的话进行修复
+1.dumpe2fs -h /dev/sda7 | grep state
+
+dumpe2fs 1.41.9 (22-Aug-2009)
+Filesystem state:         clean
+
+
+第五，对坏盘进行修复，重复多次
+ 1.fsck -y /dev/sda7
+ 2.dumpe2fs -h /dev/sda7 | grep state
+ 3.fsck -y /dev/sda7
+ 4.dumpe2fs -h /dev/sda7 | grep state
+
+第六，挂载修复盘
+ 1.vi /etc/fstab
+ 2.mount -a
+ 3.df -h
+ 4.dumpe2fs -h /dev/sdb1 | grep state
+ 5.blkid
+
+
+修改密码时，提示密码已经被使用
+chage -M 99999 lry #设置密码不过期
+mv /etc/security/opasswd /etc/security/opasswd.bak #删除密码记录
+echo Huawei@CLOUD8 | passwd  --stdin lry #修改密码
+
+
