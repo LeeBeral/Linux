@@ -11,3 +11,25 @@ webserver:~ # ps -eo pid,lstart,etime|grep 20656
 ntpdate -u 6.12.23.101
 hwclock -w;
 
+释放内存，清除僵尸进程
+sync && echo 1 > /proc/sys/vm/drop_caches;ps -A -o stat,ppid,pid,cmd | grep -e '^[Zz]' | awk '{print $2}' | xargs kill -9
+
+磁盘读写性能监控
+iostat -dmx 2 5
+iotop -oP
+
+防止系统密码过期
+chage -M 99999 lry
+
+防止ssh超时断连
+vi /etc/ssh/sshd_config
+把这行修改
+ClientAliveInterval 900
+修改为：
+ClientAliveInterval 20
+
+ssh部分设备无法联通
+ls /var/run/sshd.init.pid
+没有这个文件，touch一个
+
+
