@@ -91,4 +91,40 @@ chage -M 99999 lry #设置密码不过期
 mv /etc/security/opasswd /etc/security/opasswd.bak #删除密码记录
 echo Huawei@CLOUD8 | passwd  --stdin lry #修改密码
 
+每分钟cron用法
+echo "*/1 * * * * /usr/sbin/ntpdate -u 10.3.23.46" >> /var/spool/cron/crontabs/root
+
+周期任务清除lry日志
+第一步：
+echo "10 1 * * 6 /home/lry/lrylogcl.sh" >> /var/spool/cron/tabs/lry
+每周六1点十分执行脚本
+第二步：
+vi /home/lry/lrylogcl.sh
+内容如下：
+#!/bin/bash
+
+echo  " "  > /var/log/a.log &
+echo  " "  > /var/log/b.log &
+
+第三步：
+cd /home/lry/
+chown lry:lry lrylogcl.sh
+chmod +x lrylogcl.sh
+第四步：
+
+nohup ./lrylogcl.sh &
+
+
+sed用法
+sed -n '/local/s/10.157.240.241/10.185.184.221/p' /etc/openvpn/server1.conf
+
+不改权限同步文件
+rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
+
+批量删除十天以上旧文件
+ find . -type f -mtime +10 -exec rm {} \; 
+ find ./ -name "cron-2019*" -mtime +10 -exec rm  {} \; 
+
+
+
 
