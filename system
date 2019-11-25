@@ -151,3 +151,49 @@ find  -name "*"  ! -newer  passwd.bak  -exec ls -l {} \;
 
 
 
+服务器大量文件权限被修改,使用linux自带的getfacl、setfacl命令进行权限的恢复，具体恢复方法如下：
+1> 以root用户登陆一套正常环境A，在任意目录下执行以下命令：
+		getfacl -Rp / >system.bak （/ 为目标目录，只是部分目录的话可以改为目标目录，system.bak也可以更改为其他名称，此步骤耗时15分钟左右）
+2> 使用SCP工具将system.bak保存在本地，然后上传到问题B服务器的/home/lry/,查看权限是否为640，如果为否则更改为640
+3> 以root用户登录问题webserver,执行以下命令（耗时1个小时左右）
+		cd /home/lry
+		chown root:root system.bak
+		setfacl --restore=./system.bak
+  
+  
+  watch 命令，每隔三秒执行一次期望命令
+
+watch  -n3 ifconfig eth2
+watch -d -n 1 -t free
+
+-d 高亮显示变化部分
+-t 不显示标题
+-n 3 每隔3秒刷新一次
+
+xargs的i参数和I参数
+i 是用{}代替管道前的对象，I是指定符合来代替管道前的对象
+find . -name "mun.txt" | xargs -i  rm {}
+find . -name "mun.txt" | xargs -I haha   cp  haha wawa
+
+
+保留权限压缩和复制
+tar命令一段要进对象目录下执行，不要在根目录执行
+保留权限压缩 -p
+tar -zcvpf log31.tar.gz log2014.log log2015.log log2016.log 
+
+保留权限复制 -p
+cp -p
+
+
+参照对象修改权限
+--reference=<目录或文件> 把指定的目录/文件作为参考，把操作的文件/目录设置成参考文件/目录相同拥有者和群组
+
+chown test.ha  --reference /opt/pub/software/SETUPOS.tar 
+
+chmod test.ha  --reference /opt/pub/software/SETUPOS.tar
+
+
+查询大文件
+ du -h --max-depth=2 ./
+ls -lahS
+
