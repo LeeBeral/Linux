@@ -126,5 +126,28 @@ rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
  find ./ -name "cron-2019*" -mtime +10 -exec rm  {} \; 
 
 
+inode满了处理方法
+用一下命令找到文件最多的文件夹，移动或者删除
+
+find */ ! -type l | cut -d / -f 1 | uniq -c
+
+
+find新用
+  find / -maxdepth 2 -type d
+  find / -maxdepth 1 -type d
+  find / -maxdepth 1 -type d | awk 'NR>1{print $0}'
+  #find / -maxdepth 1 -type d | awk 'NR>1{print $0}' | xargs -i find {} -name ""
+  find / -maxdepth 1 -type d | awk 'NR>1{print $0}' | xargs -i -P 8 find {} -name "session-loader"
+  find / -maxdepth 1 -type d | awk 'NR>1{print $0}' | xargs -i -P 8 find {} -name "unisess"
+
+查找一下比passwd.bak 新的文件并长格式显示
+
+find  -name "*"  -newer  passwd.bak  -exec ls -l {} \;
+
+
+查找一下不比passwd.bak 新的文件并长格式显示
+
+find  -name "*"  ! -newer  passwd.bak  -exec ls -l {} \;
+
 
 
