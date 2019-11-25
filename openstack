@@ -1,3 +1,79 @@
 为虚拟机绑定VIP
 neutron port-create --fixed-ip ip_address=5.50.201.30 --security-group paas_sg paas20big_om
 neutron port-update afc62d0c-e430-432f-b56d-2d04ab45997c --allowed_address_pairs list=true type=dict ip_address=5.50.201.30
+
+I层创建虚拟机
+nova boot --block-device bootindex=0,source=image,dest=volume,id=4898f87f-ab0c-4590-a8a1-f0814a4e98bf,size=240 --flavor test-4-8-240 --nic net-id=9ef5643a-0bc0-4ae5-9d9d-48a0f3a8f149 --security-groups paas_sg yrj
+
+
+查看pci编号和网口对应关系
+ll /sys/class/net/
+
+手动创建磁盘
+cinder create 100 --name=PaaS-OM-Core01 --volume-type=paasvolume      //创建一个大小为100G，名字为PaaS-OM-Core01，磁盘类型为paasvolume的磁盘
+cinder create 100 --share T --name=PaaS-OM-Core01 --volume-type=paasvolume   //创建一个大小为100G，名字为PaaS-OM-Core01，磁盘类型为paasvolume的磁盘，且该磁盘可以共享
+
+##########修改VIP#############
+neutron port-update --no-allowed-address-pairs 4be8eac1-88ef-404f-a1cf-78f6922ada75
+neutron port-update afc62d0c-e430-432f-b56d-2d04ab45997c --allowed_address_pairs list=true type=dict ip_address=7.11.2.22
+neutron port-update 4be8eac1-88ef-404f-a1cf-78f6922ada75 --allowed_address_pairs list=true type=dict ip_address=7.11.2.22
+#############修改float ip#######
+neutron floatingip-list   #查float ip ID
+
+neutron floatingip-disassociate             <float ip ID>
+neutron floatingip-disassociate  19a8e3c5-c79d-4248-97b1-143c51295fea   #解除关联
+neutron floatingip-associate          <float ip ID>                                <网卡ID>
+
+neutron floatingip-associate 04ec88cd-b676-4422-92a8-b7c2e09be29e e133a6f2-c86d-4404-9dc1-106d2872f889  #直接关联
+
+手动创建port
+
+neutron port-create --fixed-ip ip_address=5.50.201.30 --security-group paas_sg paas20big_om
+neutron port-create   --security-group paas_sg out_big
+
+将网络修改为外部网络
+
+neutron net-update 2cca7489-a39c-42df-b1ce-704b817dcc0a --router:external true
+
+列出虚拟机网口
+nova interface-list dpu-f6ed9a77-0q3tr
+
+添加floatingip
+
+neutron floatingip-create --port-id df8e7cee-ea6e-4749-94a0-3402ce9cf488 --floating-ip-address=10.185.206.163 out_big
+
+创建安全组，加规则
+neutron security-group-create paas_sg
+neutron security-group-rule-create paas_sg --direction ingress  --remote-ip-prefix 0.0.0.0/0
+neutron security-group-rule-list
+
+虚拟机网络不通，配置安全组：
+
+ neutron security-group-list
+
+部分安全组不包括remote_ip_prefix: 0.0.0.0/0  字样
+
+执行语句：
+
+ neutron security-group-rule-create secid --direction ingress  --remote-ip-prefix 0.0.0.0/0
+
+
+虚拟机手动修改vip网口
+
+ip addr del dev eth0 7.12.5.120/16
+ip add show eth0
+ip addr add dev eth0 7.11.2.111/16
+ip add show eth0
+ip addr add dev eth0 7.11.2.111/16
+ip add show eth0
+ip addr add dev eth1 7.12.5.120/16
+ip add show eth1
+
+ip addr del dev eth0 7.12.5.120/16;ip addr add dev eth1 7.12.5.120/16;ip addr show eth1
+ip addr del dev eth0  7.30.201.101/16 ;ip addr add dev eth1  7.30.201.101/16 ;ip addr show eth1
+
+
+
+
+
+
