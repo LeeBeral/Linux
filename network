@@ -1,0 +1,118 @@
+物理机环境组网过程
+
+2019年5月30日
+11:36
+
+1. 网络规划
+	a. 避免环路
+	b. 设计vlan
+	c. 预留交换机之间的连接口
+2. console口连被配置交换机
+	a. putty工具选择serial连接模式
+	b. serial选择COM1，不通选COM2
+3. 改名
+	a. sys view     #进配置模式
+	b. sysname    #改名
+4. 启动vlan
+	a. vlan 3000    #管理vlan3000
+	b. vlan 777    #om 和 bmc vlan 777
+	c. vlan 1777    #业务vlan 1777
+5. 配置管理IP
+	a. int vlanif  3000    #进入管理vlan
+	b. ip add 9.37.36.10 24    #配置管理IP和掩码
+6. 配置trunk
+	a. int g 0/0/48    #进入规划好的端口
+	b. port link-type trunk    #将模式改为trunk
+	c. undo port trunk allow-pass vlan 1    #阻止vlan1通过
+	d. port trunk allow-pass vlan 1777    #设置需要放通的vlan
+7. 配置telnet
+	a. user-interface vty 0 4    #设置连接个数
+	b. auth pass    #以密码形式访问
+	c. user privilege level 3    #设置特权等级为3
+	d. set auth pass cipher Smartcare01        #设置cipher格式的密码为Smartcare01
+8. 看配置和验证
+	a. telnet 127.0.0.1    #验证telnet
+	b. dis cur    #查看配置
+	c. dis ip in brief    #查看ip配置
+	d. dis ll ner brief    #查看相邻设备
+9. 批量划vlan
+	a. port-group 1        #创建组1
+	b. group number g 0/0/1 to g 0/0/10    #设置组1成员
+	c. port link-type access        #改变连接模式
+	d. port default vlan 1777        #配置vlan
+10. 开启lldp
+	sys
+	lldp en
+	ntdp enable
+	ndp enable
+	bpdu enable
+
+
+交换机查看带宽
+
+
+<SC32-OM>display  interface  Ethernet  brief 
+
+
+端口流量限制
+
+端口模式下
+qos lr  inbound cir  100000 cbs 120000
+dis qos  lr  inbound  interface  g 0/0/8
+
+undo qos lr inb
+
+清空交换机端口统计数据
+
+全局模式下
+<O1-09-dian>reset counters interface
+
+不关闭防火墙windows可以被不同网段ping通
+回显请求icmpv4 调为‘任何’
+
+
+添加路由
+
+route add -net 9.37.0.0 netmask 255.255.0.0 gw 192.168.2.51
+
+route del default gw 7.12.0.1 dev eth0
+route add default gw 10.185.186.1 dev eth1
+
+临时添加和删除IP
+
+  471  2019-11-15 06:09:14 ip addr del 172.17.0.1/16 docker0
+  472  2019-11-15 06:09:20 ip addr del 172.17.0.1/16 dev docker0
+  473  2019-11-15 06:09:22 ifconfig 
+  474  2019-11-15 06:09:33 ip addr add 172.17.0.1/16 dev docker0
+
+修改mtu值
+ifconfig bond1 mtu 1500
+
+
+修改MAC地址
+（注意：直连服务器，或者登陆后台管理平台，VNC登陆对应的虚拟机，否则，执行下面的命令时，eth0端口被关闭，无法登陆再次虚拟机）
+
+ifconfig eth0 down
+ifconfig eth0 hw ether XXXXXXXX(对HWaddr后面MAC地址进行修改，不需要冒号)
+ifconfig eth0 up
+
+3、永久性修改：
+执行命令，添加下面的内容命令到rc.local文件中：
+# vim /etc/rc.d/rc.local
+ifdown eth0
+ifconfig eth0 hw ether XXXXXXXX（ifconfig查出来的MAC地址)
+ifup eth0
+
+4、为保证MAC地址生效，重启当前服务器的网络
+service network restart
+或者直接后台重启服务器
+reboot
+
+
+5、MAC地址修改成功。
+
+
+清除交换机配置
+reset saved-configuration
+
+reboot
