@@ -1,0 +1,27 @@
+系统点亮定位灯
+Linux:~ #  ipmitool  chassis identify 255
+Chassis identify interval: 255 seconds
+
+
+IBMC命令点亮定位灯
+ipmcset -d identify -v 255
+
+windows用ipmitool工具点亮定位灯（需下载安装）
+ipmitool -H 10.185.205.30  -I lanplus -U root -P Huawei12#$  chassis identify 255
+
+IBMC命令开关第5块盘的定位灯
+
+ipmcset -d locate -v 5 start
+ipmcset -d locate -v 5 stop
+
+系统点亮网口
+ethtool -p eth1 255
+
+
+查看网卡编号
+lspci | egrep -i --color "network|ethernet" 
+
+获取RAID卡信息
+lspci | grep -i raid
+
+
