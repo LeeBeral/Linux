@@ -116,3 +116,22 @@ reboot
 reset saved-configuration
 
 reboot
+
+
+
+
+在web服务器上添加映射规则
+######  iptables -t nat -A PREROUTING  -d 10.185.184.166 （web大网） -p tcp --dport 22988 -j DNAT --to 9.37.21.193:2988（iq小网）
+
+iptables -t nat -A PREROUTING  -d 10.185.186.99 -p tcp --dport 22988 -j DNAT --to 3.8.8.13:2988
+
+###### iptables -t nat -A POSTROUTING -d 9.37.21.193 （iq小网）-p tcp --dport 2988  -j SNAT --to 9.37.x.x（WEB的小网）
+
+ iptables -t nat -A POSTROUTING -d 3.8.8.13 -p tcp --dport 2988 -j SNAT --to 3.8.8.6
+
+3.  在IQ服务器上添加网关：
+	            route add default gw 10.185.184.1(webserver大网网关)
+	   若对应服务器上没有配置大网，请使用webserver小网IP执行：
+	            route add default gw 9.37.21.187
+4.  使用大网链接数据库，或在本地cmd执行如下操作，确认操作成功
+   telnet 10.185.184.166 22988  
