@@ -1,1 +1,14 @@
+hadoop集群启动顺序
+LdapServer-> KrbServer-> DBService -> ZooKeeper-> HDFS-> HBase -> Hive -> Impala -> Mapreduce-> Spark -> Yarn
+
+连接impala库
+source /opt/client/bigdata_env
+kinit -k -t /opt/client/keytab/ossuser.keytab ossuser@HADOOP.COM
+impala-shell -k -i haproxyfloatname:28040;
+
+连接Spark库
+source /opt/client/bigdata_env
+kinit -kt /opt/client/keytab/ossuser.keytab ossuser
+/opt/client/Spark2x/spark/bin/spark-sql
+select 123;
 
