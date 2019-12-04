@@ -1,0 +1,12 @@
+paas基本操作
+
+kubectl  get -n om  nodes
+kubectl  get -n om  pods
+kubectl  get -n manage  pods
+
+kubectl -n om delete pod  alm-almreceiver-1543464989-65rnq
+
+
+docker exec -it IQ base
+docker ps -a
+docker logs 009c40dba61a
