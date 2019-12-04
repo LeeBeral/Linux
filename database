@@ -12,3 +12,10 @@ kinit -kt /opt/client/keytab/ossuser.keytab ossuser
 /opt/client/Spark2x/spark/bin/spark-sql
 select 123;
 
+hdfs删除坏块
+hdfs fsck / -delete
+
+清理hdfs磁盘
+hdfs dfs -du -h /
+hdfs dfs -du -h /srv
+hdfs dfs -rm -r -skipTrash 加上目录
