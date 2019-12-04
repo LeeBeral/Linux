@@ -25,3 +25,19 @@ lspci | egrep -i --color "network|ethernet"
 lspci | grep -i raid
 
 
+1、反查BMC地址
+ipmitool lan print
+
+2、重置BMC密码
+
+ipmitool user list 1
+
+ipmitool user set password 2 Changeme_123
+2 就是bmc口的root用户的ID号码，Changeme_123就是重置的密码
+
+
+在操作系统下修改BMC IP
+[root@E6K-BH640V2 ~]# ipmitool lan set 1 ipaddr 10.144.221.58 
+Setting LAN IP Address to 10.144.221.58
+设置BMC网关为10.144.221.1：
+[root@E6K-BH640V2 ~]# ipmitool lan set 1 defgw ipaddr 10.144.221.1 
