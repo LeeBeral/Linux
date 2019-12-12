@@ -135,3 +135,8 @@ iptables -t nat -A PREROUTING  -d 10.185.186.99 -p tcp --dport 22988 -j DNAT --t
 	            route add default gw 9.37.21.187
 4.  使用大网链接数据库，或在本地cmd执行如下操作，确认操作成功
    telnet 10.185.184.166 22988  
+   
+   
+  更改网卡名称命令
+ip link set 需要更改的网卡名 name 计划更改的网卡名
+
