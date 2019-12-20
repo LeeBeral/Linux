@@ -197,3 +197,34 @@ chmod test.ha  --reference /opt/pub/software/SETUPOS.tar
  du -h --max-depth=2 ./
 ls -lahS
 
+空间不足空磁盘扩容
+一.  对新磁盘进行分区格式化   
+ 1.查看空闲盘
+  lsblk
+   2.对空盘进行分区
+   fdisk  /dev/sdc
+   3.对分区进行格式化
+   web:~ # mkfs.ext3 /dev/sdc1
+  二.  将新分区挂载到新目录
+  web:~ # mkdir /opt/pub/software_new/
+web:~ # mount /dev/sdc1 /opt/pub/software_new/
+三.  将原目录数据同步到新目录   
+web:~ # rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
+四.  卸载原目录分区 
+web:~ # umount  /srv/smartcare/
+
+umount: /srv/smartcare/: device is busy.
+
+        (In some cases useful info about processes that use
+
+         the device is found by lsof(8) or fuser(1))
+
+出现以上提示进行如下操作
+
+web:~ # fuser -km /srv/smartcare/
+
+web:~ # lsof   /srv/smartcare/
+
+web:~ # umount  /srv/smartcare/
+如果还卸载不了，按以下方式对fstab文件进行注释后重启服务器
+五.  挂载新分区到原目录 
