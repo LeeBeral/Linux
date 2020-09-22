@@ -11,6 +11,9 @@ webserver:~ # ps -eo pid,lstart,etime|grep 20656
 ntpdate -u 6.12.23.101
 hwclock -w;
 
+列出ntp与上层ntp的状态
+ntpq -p
+
 释放内存，清除僵尸进程
 sync && echo 1 > /proc/sys/vm/drop_caches;ps -A -o stat,ppid,pid,cmd | grep -e '^[Zz]' | awk '{print $2}' | xargs kill -9
 
