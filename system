@@ -1,4 +1,8 @@
+unzip 不解压查看目录文件
+unzip -v UniEPMgrV100R021C10.zip
 
+
+ 
 进程启动时间
 webserver:~ # ps -eo pid,lstart,etime|grep 20656
 20656 Mon Nov 11 18:09:23 2019  6-23:04:08
