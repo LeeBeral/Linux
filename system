@@ -1,5 +1,5 @@
 unzip 不解压查看目录文件
-unzip -v UniEPMgrV100R021C10.zip
+unzip -v test.zip
 
 
  
