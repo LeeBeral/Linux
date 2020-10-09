@@ -1,52 +1,53 @@
-unzip 不解压查看目录文件
+一、强制踢掉登录用户
+1.who或者w命令查看登录用户
+2.pkill -kill -t pts/2 
+
+二、unzip 不解压查看目录文件
 unzip -v test.zip
 
-
- 
-进程启动时间
+三、查看进程启动时间
 webserver:~ # ps -eo pid,lstart,etime|grep 20656
 20656 Mon Nov 11 18:09:23 2019  6-23:04:08
 说明：
 (20656) (Mon Nov 11 18:09:23 2019)  (6-23:04:08)
 进程ID  启动时间 已经启动了6天23小时4分
 
-
-手动与ntp服务器对时
+四、手动与ntp服务器对时
 ntpdate -u 6.12.23.101
 hwclock -w;
 
-列出ntp与上层ntp的状态
+五、列出ntp与上层ntp的状态
 ntpq -p
 
-释放内存，清除僵尸进程
+六、释放内存，清除僵尸进程
 sync && echo 1 > /proc/sys/vm/drop_caches;ps -A -o stat,ppid,pid,cmd | grep -e '^[Zz]' | awk '{print $2}' | xargs kill -9
 
-磁盘读写性能监控
+七、磁盘读写性能监控
 iostat -dmx 2 5
 iotop -oP
 
-防止系统密码过期
+八、防止系统密码过期
 chage -M 99999 lry
 
-防止ssh超时断连
+九、防止ssh超时断连
 vi /etc/ssh/sshd_config
 把这行修改
 ClientAliveInterval 900
 修改为：
 ClientAliveInterval 20
 
-ssh部分设备无法联通
+十、ssh部分设备无法联通
 ls /var/run/sshd.init.pid
 没有这个文件，touch一个
 
 
-服务器不断重启，修复ext文件系统坏块
+十一、服务器不断重启，修复ext文件系统坏块
 
-第一，确认故障盘以及文件系统是否为EXT
+1.确认故障盘以及文件系统是否为EXT
 
-1.cd /var/log/kbox/kbox-2019-07-10-06-02
-2.gzip -d kboxdump.gz
-3.cat kboxdump | grep panic
+1.1.cd /var/log/kbox/kbox-2019-07-10-06-02
+1.2.gzip -d kboxdump.gz
+1.3.cat kboxdump | grep panic
 
 [  519.104297] Kernel panic - not syncing: EXT3-fs (sda7): panic forced after error
 [  519.153652]  [<ffffffff8146d81f>] panic+0xb6/0x236
@@ -60,86 +61,84 @@ ls /var/run/sshd.init.pid
  [<ffffffff8146d7b2>] panic+0x49/0x236
 
 
-第二，卸载故障盘  
+2.卸载故障盘  
 
-1.umount /dev/sda7
-2.unnme -ar
-3.umount /var/log
-4.lsof /var/log
-5.vi /etc/fstab #查看参数是否包含errors=panic，这条参数表示有坏块就重启修复，将故障盘注释掉
-6.reboot 
+2.1.umount /dev/sda7
+2.2.unnme -ar
+2.3.umount /var/log
+2.4.lsof /var/log
+2.5.vi /etc/fstab #查看参数是否包含errors=panic，这条参数表示有坏块就重启修复，将故障盘注释掉
+2.6.reboot 
 
-第三，停止系统日志
+3.停止系统日志
  service syslog stop
 
-第四，查看状态是否为clean，不是的话进行修复
-1.dumpe2fs -h /dev/sda7 | grep state
+4.查看状态是否为clean，不是的话进行修复
+4.1.dumpe2fs -h /dev/sda7 | grep state
 
 dumpe2fs 1.41.9 (22-Aug-2009)
 Filesystem state:         clean
 
 
-第五，对坏盘进行修复，重复多次
- 1.fsck -y /dev/sda7
- 2.dumpe2fs -h /dev/sda7 | grep state
- 3.fsck -y /dev/sda7
- 4.dumpe2fs -h /dev/sda7 | grep state
+5.对坏盘进行修复，重复多次
+5.1.fsck -y /dev/sda7
+5.2.dumpe2fs -h /dev/sda7 | grep state
+5.3.fsck -y /dev/sda7
+5.4.dumpe2fs -h /dev/sda7 | grep state
 
-第六，挂载修复盘
- 1.vi /etc/fstab
- 2.mount -a
- 3.df -h
- 4.dumpe2fs -h /dev/sdb1 | grep state
- 5.blkid
+6.挂载修复盘
+6.1.vi /etc/fstab
+6.2.mount -a
+6.3.df -h
+6.4.dumpe2fs -h /dev/sdb1 | grep state
+6.5.blkid
 
 
-修改密码时，提示密码已经被使用
+十二、修改密码时，提示密码已经被使用
 chage -M 99999 lry #设置密码不过期
 mv /etc/security/opasswd /etc/security/opasswd.bak #删除密码记录
 echo Huawei@CLOUD8 | passwd  --stdin lry #修改密码
 
-每分钟cron用法
+十三、每分钟cron用法
 echo "*/1 * * * * /usr/sbin/ntpdate -u 10.3.23.46" >> /var/spool/cron/crontabs/root
 
-周期任务清除lry日志
-第一步：
+十四、周期任务清除lry日志
+1.
 echo "10 1 * * 6 /home/lry/lrylogcl.sh" >> /var/spool/cron/tabs/lry
 每周六1点十分执行脚本
-第二步：
+2.
 vi /home/lry/lrylogcl.sh
 内容如下：
 #!/bin/bash
 
 echo  " "  > /var/log/a.log &
 echo  " "  > /var/log/b.log &
-
-第三步：
+3.
 cd /home/lry/
 chown lry:lry lrylogcl.sh
 chmod +x lrylogcl.sh
-第四步：
-
+4.
 nohup ./lrylogcl.sh &
 
 
-sed用法
+十五、sed用法
 sed -n '/local/s/10.157.240.241/10.185.184.221/p' /etc/openvpn/server1.conf
 
-不改权限同步文件
+十六、不改权限同步文件
 rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
 
-批量删除十天以上旧文件
+十七、批量删除十天以上旧文件
  find . -type f -mtime +10 -exec rm {} \; 
  find ./ -name "cron-2019*" -mtime +10 -exec rm  {} \; 
 
 
-inode满了处理方法
+十八、inode满了处理方法
 用一下命令找到文件最多的文件夹，移动或者删除
 
 find */ ! -type l | cut -d / -f 1 | uniq -c
 
 
-find新用
+十九、find新用
   find / -maxdepth 2 -type d
   find / -maxdepth 1 -type d
   find / -maxdepth 1 -type d | awk 'NR>1{print $0}'
@@ -158,17 +157,17 @@ find  -name "*"  ! -newer  passwd.bak  -exec ls -l {} \;
 
 
 
-服务器大量文件权限被修改,使用linux自带的getfacl、setfacl命令进行权限的恢复，具体恢复方法如下：
-1> 以root用户登陆一套正常环境A，在任意目录下执行以下命令：
+二十、服务器大量文件权限被修改,使用linux自带的getfacl、setfacl命令进行权限的恢复，具体恢复方法如下：
+1.以root用户登陆一套正常环境A，在任意目录下执行以下命令：
 		getfacl -Rp / >system.bak （/ 为目标目录，只是部分目录的话可以改为目标目录，system.bak也可以更改为其他名称，此步骤耗时15分钟左右）
-2> 使用SCP工具将system.bak保存在本地，然后上传到问题B服务器的/home/lry/,查看权限是否为640，如果为否则更改为640
-3> 以root用户登录问题webserver,执行以下命令（耗时1个小时左右）
+2. 使用SCP工具将system.bak保存在本地，然后上传到问题B服务器的/home/lry/,查看权限是否为640，如果为否则更改为640
+3. 以root用户登录问题webserver,执行以下命令（耗时1个小时左右）
 		cd /home/lry
 		chown root:root system.bak
 		setfacl --restore=./system.bak
   
   
-  watch 命令，每隔三秒执行一次期望命令
+二十一、watch 命令，每隔三秒执行一次期望命令
 
 watch  -n3 ifconfig eth2
 watch -d -n 1 -t free
@@ -177,13 +176,13 @@ watch -d -n 1 -t free
 -t 不显示标题
 -n 3 每隔3秒刷新一次
 
-xargs的i参数和I参数
+二十二、xargs的i参数和I参数
 i 是用{}代替管道前的对象，I是指定符合来代替管道前的对象
 find . -name "mun.txt" | xargs -i  rm {}
 find . -name "mun.txt" | xargs -I haha   cp  haha wawa
 
 
-保留权限压缩和复制
+二十三、保留权限压缩和复制
 tar命令一段要进对象目录下执行，不要在根目录执行
 保留权限压缩 -p
 tar -zcvpf log31.tar.gz log2014.log log2015.log log2016.log 
@@ -192,7 +191,7 @@ tar -zcvpf log31.tar.gz log2014.log log2015.log log2016.log 
 cp -p
 
 
-参照对象修改权限
+二十四、参照对象修改权限
 --reference=<目录或文件> 把指定的目录/文件作为参考，把操作的文件/目录设置成参考文件/目录相同拥有者和群组
 
 chown test.ha  --reference /opt/pub/software/SETUPOS.tar 
@@ -200,38 +199,39 @@ chown test.ha  --reference /opt/pub/software/SETUPOS.tar
 chmod test.ha  --reference /opt/pub/software/SETUPOS.tar
 
 
-查询大文件
+二十五、查询大文件
  du -h --max-depth=2 ./
 ls -lahS
 
-空间不足空磁盘扩容
-一.  对新磁盘进行分区格式化   
- 1.查看空闲盘
-  lsblk
-   2.对空盘进行分区
-   fdisk  /dev/sdc
-   3.对分区进行格式化
-   web:~ # mkfs.ext3 /dev/sdc1
-  二.  将新分区挂载到新目录
-  web:~ # mkdir /opt/pub/software_new/
-web:~ # mount /dev/sdc1 /opt/pub/software_new/
-三.  将原目录数据同步到新目录   
-web:~ # rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
-四.  卸载原目录分区 
-web:~ # umount  /srv/smartcare/
+二十六、空间不足空磁盘扩容
+1. 对新磁盘进行分区格式化
+	1.1.查看空闲盘
+  	lsblk
+	1.2.对空盘进行分区
+	fdisk  /dev/sdc
+	1.3.对分区进行格式化
+	web:~ # mkfs.ext3 /dev/sdc1
+2.将新分区挂载到新目录
+	web:~ # mkdir /opt/pub/software_new/
+	web:~ # mount /dev/sdc1 /opt/pub/software_new/
+3.将原目录数据同步到新目录   
+	web:~ # rsync -aXS /srv/smartcare/.  /opt/pub/software_new/.
+4.卸载原目录分区 
+	web:~ # umount  /srv/smartcare/
 
-umount: /srv/smartcare/: device is busy.
+	umount: /srv/smartcare/: device is busy.
 
-        (In some cases useful info about processes that use
+        	(In some cases useful info about processes that use the device is found by lsof(8) or fuser(1))
 
-         the device is found by lsof(8) or fuser(1))
+5.出现以上提示进行如下操作
 
-出现以上提示进行如下操作
+	web:~ # fuser -km /srv/smartcare/
 
-web:~ # fuser -km /srv/smartcare/
+	web:~ # lsof   /srv/smartcare/
 
-web:~ # lsof   /srv/smartcare/
+	web:~ # umount  /srv/smartcare/
+	如果还卸载不了，按以下方式对fstab文件进行注释后重启服务器
+6.挂载新分区到原目录 
 
-web:~ # umount  /srv/smartcare/
-如果还卸载不了，按以下方式对fstab文件进行注释后重启服务器
-五.  挂载新分区到原目录 
+
+
