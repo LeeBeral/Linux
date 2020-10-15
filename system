@@ -233,5 +233,7 @@ ls -lahS
 	如果还卸载不了，按以下方式对fstab文件进行注释后重启服务器
 6.挂载新分区到原目录 
 
-
-
+二十七、查看服务
+service --status-all 
+chkconfig --list
+二十
