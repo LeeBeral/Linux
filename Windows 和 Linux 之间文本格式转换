@@ -1,0 +1,1 @@
+sed -e ‘s/.$//’ win.txt > unix.txt
