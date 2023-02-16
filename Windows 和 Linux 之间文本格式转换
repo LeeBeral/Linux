@@ -1,1 +1,9 @@
 sed -e ‘s/.$//’ win.txt > unix.txt
+
+利用 vim 处理
+用 vim 打开文件后，可以查看下当前的文件系统格式：
+:set ff?
+
+然后可以更改格式：
+set ff=unix
+
